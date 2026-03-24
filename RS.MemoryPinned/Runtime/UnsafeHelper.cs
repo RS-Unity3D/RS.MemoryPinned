@@ -40,6 +40,7 @@ namespace RS.MemoryPinned
             return Marshal.SizeOf(typeof(T));
         }
 
+#if NETSTANDARD2_0 || NETSTANDARD2_1
         /// <summary>
         /// Copies a block of memory from source to destination.
         /// 将内存块从源复制到目标。
@@ -69,6 +70,85 @@ namespace RS.MemoryPinned
                 Buffer.MemoryCopy(source, destination, byteCount, byteCount);
             }
         }
+#else
+        /// <summary>
+        /// Copies a block of memory from source to destination.
+        /// 将内存块从源复制到目标。
+        /// Cross-platform implementation using manual byte copy.
+        /// 使用手动字节复制的跨平台实现。
+        /// </summary>
+        /// <param name="destination">The destination pointer. 目标指针。</param>
+        /// <param name="source">The source pointer. 源指针。</param>
+        /// <param name="byteCount">The number of bytes to copy. 要复制的字节数。</param>
+        public static void CopyBlock(void* destination, void* source, uint byteCount)
+        {
+            if (byteCount == 0) return;
+
+            byte* src = (byte*)source;
+            byte* dst = (byte*)destination;
+
+            if (byteCount >= 8 && IsAligned(src) && IsAligned(dst))
+            {
+                CopyBlockAligned(dst, src, byteCount);
+            }
+            else
+            {
+                for (uint i = 0; i < byteCount; i++)
+                {
+                    dst[i] = src[i];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Copies a block of memory from source to destination without alignment.
+        /// 将内存块从源复制到目标（不要求对齐）。
+        /// Cross-platform implementation using manual byte copy.
+        /// 使用手动字节复制的跨平台实现。
+        /// </summary>
+        /// <param name="destination">The destination pointer. 目标指针。</param>
+        /// <param name="source">The source pointer. 源指针。</param>
+        /// <param name="byteCount">The number of bytes to copy. 要复制的字节数。</param>
+        public static void CopyBlockUnaligned(void* destination, void* source, uint byteCount)
+        {
+            if (byteCount == 0) return;
+
+            byte* src = (byte*)source;
+            byte* dst = (byte*)destination;
+
+            for (uint i = 0; i < byteCount; i++)
+            {
+                dst[i] = src[i];
+            }
+        }
+
+        private static bool IsAligned(byte* ptr)
+        {
+            return ((ulong)ptr & 7) == 0;
+        }
+
+        private static void CopyBlockAligned(byte* dst, byte* src, uint byteCount)
+        {
+            uint remaining = byteCount;
+            ulong* srcAligned = (ulong*)src;
+            ulong* dstAligned = (ulong*)dst;
+
+            while (remaining >= 8)
+            {
+                *dstAligned = *srcAligned;
+                dstAligned++;
+                srcAligned++;
+                remaining -= 8;
+            }
+
+            byte* srcRemaining = (byte*)srcAligned;
+            byte* dstRemaining = (byte*)dstAligned;
+            for (uint i = 0; i < remaining; i++)
+            {
+                dstRemaining[i] = srcRemaining[i];
+            }
+        }
+#endif
 
         /// <summary>
         /// Initializes a block of memory with the given value.

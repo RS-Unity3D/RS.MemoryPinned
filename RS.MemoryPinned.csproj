@@ -1,10 +1,91 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net20;net35;net40;net45;netstandard2.0;netstandard2.1</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>RS.MemoryPinned is a clean, third-party dependency-free, powerful, easy-to-use, high-performance cross-platform unmanaged memory manipulation library.support Unity 5+、.NET Framework 2.0+、.NET Standard 2.0/2.1、.NET Core 2.0+ and AOT</Title>
+    <Description>### Overview
+
+RS.MemoryPinned is a clean, dependency-free, powerful and easy-to-use high-performance cross-platform unmanaged memory manipulation library.
+
+### Features
+
+- **Cross-platform Support**: Supports Unity 5+, .NET Framework 2.0+, .NET Standard 2.0/2.1, .NET Core 2.0+
+- **AOT Compilation Support**: Fully supports AOT compilation environments
+- **Zero Dependencies**: No third-party library dependencies
+- **High Performance**: Direct unmanaged memory operations, avoiding GC pressure
+- **Type Safe**: Generic interfaces ensure type safety</Description>
+    <PackageProjectUrl>https://github.com/RS-Unity3D/RS.MemoryPinned</PackageProjectUrl>
+    <Copyright>andyhebear</Copyright>
+    <PackageReadmeFile></PackageReadmeFile>
+    <RepositoryUrl>https://github.com/RS-Unity3D/RS.MemoryPinned</RepositoryUrl>
+    <PackAsTool>False</PackAsTool>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>$(DefineConstants);NET45;NET4_5;NET45_OR_GREATER;NET_LEGACY</DefineConstants>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net481'">
+    <DefineConstants>$(DefineConstants);NET481;NET4_8_1;NET_LEGACY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD;NETSTANDARD2_1</DefineConstants>
+  </PropertyGroup>
+
+
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net20|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET20;NET2_0;NET_LEGACY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net35|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET35;NET3_5;NET_LEGACY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET_LEGACY;NET45;NET4_5;NET45_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net40|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET40;NET4_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net20|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET20;NET2_0</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net35|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET35;NET3_5</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net40|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET40;NET4_0;NET_LEGACY</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NET45;NET4_5;NET_LEGACY;NET45_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup> 
+      <PackageReadmeFile>README.md</PackageReadmeFile> 
+      <PackageLicenseFile>LICENSE</PackageLicenseFile> 
+      <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance> 
+      <IncludeSymbols>True</IncludeSymbols>
+
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="RS.MemoryPinned\Editor\**" />
     <Compile Remove="Tests\**" />
@@ -16,6 +97,17 @@
 
   <ItemGroup>
     <None Remove="RS.MemoryPinned\package.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
