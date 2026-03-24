@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="RS.MemoryPinned\Editor\**" />
+    <Compile Remove="Tests\**" />
+    <EmbeddedResource Remove="RS.MemoryPinned\Editor\**" />
+    <EmbeddedResource Remove="Tests\**" />
+    <None Remove="RS.MemoryPinned\Editor\**" />
+    <None Remove="Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="RS.MemoryPinned\package.json" />
+  </ItemGroup>
+
+</Project>

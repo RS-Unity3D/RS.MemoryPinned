@@ -1,0 +1,18 @@
+{
+    "name": "RS.MemoryPinned.Editor",
+    "rootNamespace": "RS.MemoryPinned",
+    "references": [
+        "GUID:338336479d2f68c43b81c7e52a1ec8e7"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
