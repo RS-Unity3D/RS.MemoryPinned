@@ -10,7 +10,7 @@ namespace RS.MemoryPinned.Extension
     /// Extension methods for array operations.
     /// 数组操作的扩展方法。
     /// </summary>
-    public static class ArrayExtension
+    public static unsafe class ArrayExtension
     {
         /// <summary>
         /// Allocates unmanaged memory and copies the array elements to it.
@@ -25,7 +25,7 @@ namespace RS.MemoryPinned.Extension
             IntPtr intPtr = Marshal.AllocHGlobal(num * array.GetLength(0));
             for (int i = 0; i < array.Length; i++)
             {
-                if (Marshal.SizeOf(typeof(IntPtr)) == 8)
+                if (sizeof(IntPtr) == 8)
                 {
                     Marshal.StructureToPtr(array.GetValue(i), (IntPtr)((long)intPtr + i * num), false);
                 }
@@ -105,7 +105,7 @@ namespace RS.MemoryPinned.Extension
     /// Extension methods for IntPtr operations.
     /// IntPtr操作的扩展方法。
     /// </summary>
-    public static class IntPtrExtension
+    public static unsafe class IntPtrExtension
     {
         /// <summary>
         /// Converts an IntPtr to an object of the specified type.
@@ -117,7 +117,11 @@ namespace RS.MemoryPinned.Extension
         /// <returns>The converted object. 转换后的对象。</returns>
         public static TElement ToObject<TElement>(this IntPtr intPtr, int offset = 0) where TElement : struct
         {
+#if NETSTANDARD2_1
+            return Marshal.PtrToStructure<TElement>(intPtr.ToIntPtr<TElement>(offset));
+#else
             return (TElement)Marshal.PtrToStructure(intPtr.ToIntPtr<TElement>(offset), typeof(TElement));
+#endif
         }
 
         /// <summary>
@@ -130,7 +134,7 @@ namespace RS.MemoryPinned.Extension
         /// <returns>The new IntPtr with offset applied. 应用偏移后的新IntPtr。</returns>
         public static IntPtr ToIntPtr<TElement>(this IntPtr intPtr, int offset = 0) where TElement : struct
         {
-            if (Marshal.SizeOf(typeof(IntPtr)) == 8)
+            if (sizeof(IntPtr) == 8)
             {
                 return (IntPtr)((long)intPtr + offset);
             }

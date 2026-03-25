@@ -14,7 +14,11 @@ namespace RS.MemoryPinned
         /// <returns>The value read from the pointer. 从指针读取的值。</returns>
         public static T Read<T>(void* source) where T : struct
         {
+#if NETSTANDARD2_1
+            return Marshal.PtrToStructure<T>((IntPtr)source);
+#else
             return (T)Marshal.PtrToStructure((IntPtr)source, typeof(T));
+#endif
         }
 
         /// <summary>
@@ -37,7 +41,11 @@ namespace RS.MemoryPinned
         /// <returns>The size of type T in bytes. 类型T的字节大小。</returns>
         public static int SizeOf<T>() where T : struct
         {
+#if NETSTANDARD2_1
+            return Marshal.SizeOf<T>();
+#else
             return Marshal.SizeOf(typeof(T));
+#endif
         }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1
@@ -87,9 +95,13 @@ namespace RS.MemoryPinned
             byte* src = (byte*)source;
             byte* dst = (byte*)destination;
 
-            if (byteCount >= 8 && IsAligned(src) && IsAligned(dst))
+            if (sizeof(IntPtr) == 8 && byteCount >= 8 && IsAligned8(src) && IsAligned8(dst))
             {
-                CopyBlockAligned(dst, src, byteCount);
+                CopyBlockAligned64(dst, src, byteCount);
+            }
+            else if (sizeof(IntPtr) == 4 && byteCount >= 4 && IsAligned4(src) && IsAligned4(dst))
+            {
+                CopyBlockAligned32(dst, src, byteCount);
             }
             else
             {
@@ -122,12 +134,17 @@ namespace RS.MemoryPinned
             }
         }
 
-        private static bool IsAligned(byte* ptr)
+        private static bool IsAligned8(byte* ptr)
         {
-            return ((ulong)ptr & 7) == 0;
+            return (((int)ptr) & 7) == 0;
         }
 
-        private static void CopyBlockAligned(byte* dst, byte* src, uint byteCount)
+        private static bool IsAligned4(byte* ptr)
+        {
+            return (((int)ptr) & 3) == 0;
+        }
+
+        private static void CopyBlockAligned64(byte* dst, byte* src, uint byteCount)
         {
             uint remaining = byteCount;
             ulong* srcAligned = (ulong*)src;
@@ -139,6 +156,28 @@ namespace RS.MemoryPinned
                 dstAligned++;
                 srcAligned++;
                 remaining -= 8;
+            }
+
+            byte* srcRemaining = (byte*)srcAligned;
+            byte* dstRemaining = (byte*)dstAligned;
+            for (uint i = 0; i < remaining; i++)
+            {
+                dstRemaining[i] = srcRemaining[i];
+            }
+        }
+
+        private static void CopyBlockAligned32(byte* dst, byte* src, uint byteCount)
+        {
+            uint remaining = byteCount;
+            uint* srcAligned = (uint*)src;
+            uint* dstAligned = (uint*)dst;
+
+            while (remaining >= 4)
+            {
+                *dstAligned = *srcAligned;
+                dstAligned++;
+                srcAligned++;
+                remaining -= 4;
             }
 
             byte* srcRemaining = (byte*)srcAligned;

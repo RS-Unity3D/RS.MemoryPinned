@@ -395,7 +395,11 @@ namespace RS.MemoryPinned.Model
         public TElementToWrite ReadElementAtIndex<TElementToWrite>(int index) where TElementToWrite : struct
         {
             EndureIndex<TElement>(index);
+#if NETSTANDARD2_1
+            return Marshal.PtrToStructure<TElementToWrite>(IntPtrs[index]);
+#else
             return (TElementToWrite)Marshal.PtrToStructure(IntPtrs[index], typeof(TElementToWrite));
+#endif
         }
 
         internal void EndureIndex<TElement>(int index) where TElement : struct
@@ -666,7 +670,11 @@ namespace RS.MemoryPinned.Model
         /// <returns>The value read from the index. 从索引读取的值。</returns>
         public TElementToWrite ReadElementAtIndex<TElementToWrite>(int index) where TElementToWrite : struct
         {
+#if NETSTANDARD2_1
+            return Marshal.PtrToStructure<TElementToWrite>(GetPointerAtIndex<TElementToWrite>(index));
+#else
             return (TElementToWrite)Marshal.PtrToStructure(GetPointerAtIndex<TElementToWrite>(index), typeof(TElementToWrite));
+#endif
         }
 
         /// <summary>
@@ -903,7 +911,11 @@ namespace RS.MemoryPinned.Model
         public TElementToWrite ReadElementAtIndex<TElementToWrite>(int index) where TElementToWrite : struct
         {
             _pinned.EndureIndex<TElement>(index);
+#if NETSTANDARD2_1
+            return Marshal.PtrToStructure<TElementToWrite>(IntPtrs[index]);
+#else
             return (TElementToWrite)Marshal.PtrToStructure(IntPtrs[index], typeof(TElementToWrite));
+#endif
         }
 
         /// <summary>

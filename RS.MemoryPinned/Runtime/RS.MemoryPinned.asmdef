@@ -1,18 +1,18 @@
 {
-    "name": "com.rs.memorypinned.editor",
+    "name": "com.rs.memorypinned",
     "rootNamespace": "RS.MemoryPinned",
-    "references": [
-        "GUID:338336479d2f68c43b81c7e52a1ec8e7"
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [
+
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY3D"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

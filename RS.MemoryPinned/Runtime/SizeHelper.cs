@@ -21,7 +21,11 @@ namespace RS.MemoryPinned
         {
             if (typeof(TElement) != typeof(char))
             {
+#if NETSTANDARD2_1
+                return Marshal.SizeOf<TElement>();
+#else
                 return Marshal.SizeOf(typeof(TElement));
+#endif
             }
             return 2;
         }
@@ -60,11 +64,14 @@ namespace RS.MemoryPinned
                 Array array = variable as Array;
                 if (array != null)
                 {
-                    array.GetType().GetElementType();
                     int num = SizeOfElement<TElement>();
                     return array.GetLength(0) * num;
                 }
+#if NETSTANDARD2_1
+                return Marshal.SizeOf<TElement>();
+#else
                 return Marshal.SizeOf(variable.GetType());
+#endif
             }
             catch (Exception value)
             {
