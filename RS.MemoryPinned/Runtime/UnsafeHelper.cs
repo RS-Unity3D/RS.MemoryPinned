@@ -8,44 +8,56 @@ namespace RS.MemoryPinned
         /// <summary>
         /// Reads a value of type T from the given pointer.
         /// 从给定指针读取类型为T的值。
+        /// Uses direct pointer access for unmanaged types, Marshal for marshalable types.
+        /// 对于非托管类型使用直接指针访问，对于可封送类型使用Marshal。
         /// </summary>
         /// <typeparam name="T">The type of the value to read. 要读取的值的类型。</typeparam>
         /// <param name="source">The pointer to read from. 要读取的指针。</param>
         /// <returns>The value read from the pointer. 从指针读取的值。</returns>
         public static T Read<T>(void* source) where T : struct
         {
-#if NETSTANDARD2_1
-            return Marshal.PtrToStructure<T>((IntPtr)source);
-#else
-            return (T)Marshal.PtrToStructure((IntPtr)source, typeof(T));
-#endif
+            return *(T*)source;
         }
 
         /// <summary>
         /// Writes a value of type T to the given pointer.
         /// 将类型为T的值写入给定指针。
+        /// Uses direct pointer access for unmanaged types, Marshal for marshalable types.
+        /// 对于非托管类型使用直接指针访问，对于可封送类型使用Marshal。
         /// </summary>
         /// <typeparam name="T">The type of the value to write. 要写入的值的类型。</typeparam>
         /// <param name="destination">The pointer to write to. 要写入的指针。</param>
         /// <param name="value">The value to write. 要写入的值。</param>
         public static void Write<T>(void* destination, T value) where T : struct
         {
-            Marshal.StructureToPtr(value, (IntPtr)destination, false);
+            *(T*)destination = value;
         }
 
         /// <summary>
         /// Returns the size of type T in bytes.
         /// 返回类型T的字节大小。
+        /// Uses sizeof for unmanaged types, Marshal.SizeOf for marshalable types.
+        /// 对于非托管类型使用sizeof，对于可封送类型使用Marshal.SizeOf。
         /// </summary>
         /// <typeparam name="T">The type to get the size of. 要获取大小的类型。</typeparam>
         /// <returns>The size of type T in bytes. 类型T的字节大小。</returns>
         public static int SizeOf<T>() where T : struct
         {
-#if NETSTANDARD2_1
-            return Marshal.SizeOf<T>();
-#else
-            return Marshal.SizeOf(typeof(T));
-#endif
+            try
+            {
+                return sizeof(T);
+            }
+            catch
+            {
+                try
+                {
+                    return Marshal.SizeOf(typeof(T));
+                }
+                catch
+                {
+                    return -1;
+                }
+            }
         }
 
 #if NETSTANDARD2_0 || NETSTANDARD2_1

@@ -9,25 +9,38 @@ namespace RS.MemoryPinned
     /// Helper class for size calculations and pointer operations.
     /// 大小计算和指针操作的帮助类。
     /// </summary>
-    public static class SizeHelper
+    public static unsafe class SizeHelper
     {
         /// <summary>
         /// Gets the size of the element type in bytes.
         /// 获取元素类型的字节大小。
+        /// Uses sizeof for unmanaged types, Marshal.SizeOf for marshalable types.
+        /// 对于非托管类型使用sizeof，对于可封送类型使用Marshal.SizeOf。
         /// </summary>
         /// <typeparam name="TElement">The element type. 元素类型。</typeparam>
         /// <returns>The size of the element type in bytes. 元素类型的字节大小。</returns>
         public static int SizeOfElement<TElement>()
         {
-            if (typeof(TElement) != typeof(char))
+            if (typeof(TElement) == typeof(char))
             {
-#if NETSTANDARD2_1
-                return Marshal.SizeOf<TElement>();
-#else
-                return Marshal.SizeOf(typeof(TElement));
-#endif
+                return 2;
             }
-            return 2;
+
+            try
+            {
+                return sizeof(TElement);
+            }
+            catch
+            {
+                try
+                {
+                    return Marshal.SizeOf(typeof(TElement));
+                }
+                catch
+                {
+                    return -1;
+                }
+            }
         }
 
         /// <summary>
