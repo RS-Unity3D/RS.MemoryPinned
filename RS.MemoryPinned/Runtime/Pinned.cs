@@ -208,21 +208,8 @@ namespace RS.MemoryPinned.Model
         /// <param name="variable">The variable to pin. 要固定的变量。</param>
         protected void AllocateHandle(T variable)
         {
-            Type type = variable.GetType();
-            if (type.HasElementType)
-            {
-                Type elementType = type.GetElementType();
-                if (elementType != null && !elementType.IsPrimitive)
-                {
-                    Global = ((Array)(object)variable).AllocateCopyArray<TElement>();
-                    IntPtr = Global;
-                }
-            }
-            if (IntPtr == IntPtr.Zero)
-            {
-                Handle = GCHandle.Alloc(variable, GCHandleType.Pinned);
-                IntPtr = Handle.AddrOfPinnedObject();
-            }
+            Handle = GCHandle.Alloc(variable, GCHandleType.Pinned);
+            IntPtr = Handle.AddrOfPinnedObject();
         }
 
         /// <summary>
