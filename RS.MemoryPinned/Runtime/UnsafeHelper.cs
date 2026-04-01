@@ -41,22 +41,36 @@ namespace RS.MemoryPinned
         /// </summary>
         /// <typeparam name="T">The type to get the size of. 要获取大小的类型。</typeparam>
         /// <returns>The size of type T in bytes. 类型T的字节大小。</returns>
+        /// <exception cref="NotSupportedException">
+        /// Thrown when the type is not an unmanaged or marshalable type.
+        /// 当类型不是非托管类型或可封送类型时抛出。
+        /// </exception>
         public static int SizeOf<T>() where T : struct
         {
+            Type type = typeof(T);
+            Exception innerException = null;
+
             try
             {
                 return sizeof(T);
             }
-            catch
+            catch (Exception ex)
             {
-                try
-                {
-                    return Marshal.SizeOf(typeof(T));
-                }
-                catch
-                {
-                    return -1;
-                }
+                innerException = ex;
+            }
+
+            try
+            {
+                return Marshal.SizeOf(type);
+            }
+            catch (Exception ex)
+            {
+                throw new NotSupportedException(
+                    string.Format("Type '{0}' is not supported for size calculation. Only unmanaged types and marshalable types are supported. sizeof error: {1}; Marshal.SizeOf error: {2}",
+                        type.FullName,
+                        innerException?.Message ?? "N/A",
+                        ex.Message),
+                    ex);
             }
         }
 
