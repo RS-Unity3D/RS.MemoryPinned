@@ -1,6 +1,8 @@
 #define TRACE
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace RS.MemoryPinned
@@ -19,27 +21,73 @@ namespace RS.MemoryPinned
         /// </summary>
         /// <typeparam name="TElement">The element type. 元素类型。</typeparam>
         /// <returns>The size of the element type in bytes. 元素类型的字节大小。</returns>
+        /// <exception cref="NotSupportedException">
+        /// Thrown when the type is not an unmanaged or marshalable type.
+        /// 当类型不是非托管类型或可封送类型时抛出。
+        /// </exception>
         public static int SizeOfElement<TElement>()
         {
-            if (typeof(TElement) == typeof(char))
+            Type type = typeof(TElement);
+
+            if (type == typeof(char))
             {
                 return 2;
             }
+            if (type == typeof(bool))
+            {
+                return 1;
+            }
+            if (type == typeof(DateTime))
+            {
+                return sizeof(DateTime);
+            }
+            if (type == typeof(DateTimeOffset))
+            {
+                return sizeof(DateTimeOffset);
+            }
+            if (type == typeof(TimeSpan))
+            {
+                return sizeof(TimeSpan);
+            }
+            if (type == typeof(Guid))
+            {
+                return sizeof(Guid);
+            }
+            if (type == typeof(decimal))
+            {
+                return sizeof(decimal);
+            }
+            if (type == typeof(IntPtr))
+            {
+                return sizeof(IntPtr);
+            }
+            if (type == typeof(UIntPtr))
+            {
+                return sizeof(UIntPtr);
+            }
 
+            Exception innerException = null;
             try
             {
                 return sizeof(TElement);
             }
-            catch
+            catch (Exception ex)
             {
-                try
-                {
-                    return Marshal.SizeOf(typeof(TElement));
-                }
-                catch
-                {
-                    return -1;
-                }
+                innerException = ex;
+            }
+
+            try
+            {
+                return Marshal.SizeOf(type);
+            }
+            catch (Exception ex)
+            {
+                throw new NotSupportedException(
+                    string.Format("Type '{0}' is not supported for size calculation. Only unmanaged types and marshalable types are supported. sizeof error: {1}; Marshal.SizeOf error: {2}",
+                        type.FullName,
+                        innerException?.Message ?? "N/A",
+                        ex.Message),
+                    ex);
             }
         }
 
@@ -60,36 +108,50 @@ namespace RS.MemoryPinned
         /// </summary>
         /// <typeparam name="TElement">The element type. 元素类型。</typeparam>
         /// <param name="variable">The variable to measure. 要测量的变量。</param>
-        /// <returns>The size in bytes, or -1 on error. 字节大小，错误时返回-1。</returns>
+        /// <returns>The size in bytes. 字节大小。</returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when variable is null and null is not expected.
+        /// 当 variable 为 null 且不允许 null 时抛出。
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// Thrown when the type is not supported for size calculation.
+        /// 当类型不支持大小计算时抛出。
+        /// </exception>
         public static int GetSize<TElement>(object variable) where TElement : struct
         {
+            if (variable == null)
+            {
+                return 0;
+            }
+
+            string text = variable as string;
+            if (text != null)
+            {
+                return text.Length * 2;
+            }
+
+            Array array = variable as Array;
+            if (array != null)
+            {
+                int elementSize = SizeOfElement<TElement>();
+                return array.GetLength(0) * elementSize;
+            }
+
             try
             {
-                if (variable == null)
-                {
-                    return 0;
-                }
-                string text = variable as string;
-                if (text != null)
-                {
-                    return text.Length * 2;
-                }
-                Array array = variable as Array;
-                if (array != null)
-                {
-                    int num = SizeOfElement<TElement>();
-                    return array.GetLength(0) * num;
-                }
 #if NETSTANDARD2_1
                 return Marshal.SizeOf<TElement>();
 #else
                 return Marshal.SizeOf(variable.GetType());
 #endif
             }
-            catch (Exception value)
+            catch (Exception ex)
             {
-                Trace.WriteLine(value);
-                return -1;
+                throw new NotSupportedException(
+                    string.Format("Cannot determine size of variable of type '{0}'. Original error: {1}",
+                        variable.GetType().FullName,
+                        ex.Message),
+                    ex);
             }
         }
 
@@ -123,4 +185,7 @@ namespace RS.MemoryPinned
             return (IntPtr)(uint)((int)pointer + index * size);
         }
     }
+
+   
+
 }
