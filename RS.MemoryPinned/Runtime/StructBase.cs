@@ -81,12 +81,12 @@ namespace RS.MemoryPinned.Internals.Get
         /// </summary>
         /// <typeparam name="TargetType">The type of the value. 值的类型。</typeparam>
         /// <param name="index">The index. 索引。</param>
-        /// <returns>A reference to the value. 值的引用。</returns>
+        /// <returns>A reference to the value at the specified index. 指定索引处值的引用。</returns>
         public unsafe ref TargetType GetValue<TargetType>(int index) where TargetType : struct
         {
             EnsureIndex<TElement, TargetType>(index + StartIndex);
-            TargetType val = UnsafeHelper.Read<TargetType>(GetIntPtr(index + StartIndex, SizeHelper.SizeOfElement<TargetType>()).ToPointer());
-            return ref val;
+            void* ptr = GetIntPtr(index + StartIndex, SizeHelper.SizeOfElement<TargetType>()).ToPointer();
+            return ref *(TargetType*)ptr;
         }
 
         /// <summary>
